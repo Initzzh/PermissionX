@@ -1,46 +1,56 @@
 package com.sunnyweather.permissionx
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.sunnyweather.permissionx.ui.theme.PermissionXTheme
 
-class MainActivity : ComponentActivity() {
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import com.permissionx.zzhdev.PermissionX
+
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            PermissionXTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+        setContentView(R.layout.activity_main)
+        val makeCallBtn = findViewById<Button>(R.id.makeCallBtn)
+        makeCallBtn.setOnClickListener {
+            PermissionX.request(this,
+                Manifest.permission.CALL_PHONE ) { allGranted, deniedList ->
+                    if  (allGranted) {
+                        call()
+                    } else {
+                        Toast.makeText(this,
+                            "You denied $deniedList ",
+                            Toast.LENGTH_SHORT).show()
+                    }
             }
+
+          /*  // 一次申请多个权限
+            PermissionX.request(this,
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.READ_CONTACTS) { allGranted, deniedList ->
+                if (allGranted) {
+                    Toast.makeText(this, "All permissions are granted", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "You denied $deniedList", Toast.LENGTH_SHORT).show()
+                }
+
+            }*/
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun call(){
+        try {
+            val callIntent = Intent(Intent.ACTION_CALL)
+            callIntent.data = Uri.parse("tel:10086")
+            startActivity(callIntent)
+        } catch (e:  SecurityException) {
+            e.printStackTrace()
+        }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PermissionXTheme {
-        Greeting("Android")
+
+
     }
 }
